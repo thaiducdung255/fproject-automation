@@ -70,8 +70,8 @@ async function resolveIssues(driver, unconfirmedIssues) {
       const issueName = await subject.getText();
       const estimatedTime = await issue.findElement(By.className('estimated_hours')).getText();
       const issueUrl = await subject.findElement(By.tagName('a')).getAttribute('href');
-      console.log(`found unconfirmed issue: ${issueName} - ${issueUrl}`);
-      issuesObj.push({ estimatedTime, issueUrl });
+      console.log(`${i + 1}. unconfirmed issue: ${issueName} - ${issueUrl}`);
+      issuesObj.push({ estimatedTime, issueUrl, issueName });
    }
 
    while (issuesObj.length > 0) {
@@ -79,8 +79,6 @@ async function resolveIssues(driver, unconfirmedIssues) {
       // log time for issue
       while (true) {
          const isSuccess = await logTime(driver, estimatedTime, issueUrl, currentDate);
-         console.log({ isSuccess });
-
          if (isSuccess) {
             break;
          }
