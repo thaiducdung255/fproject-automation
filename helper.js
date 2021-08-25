@@ -1,6 +1,11 @@
 const { By, until, Key } = require('selenium-webdriver');
+
 const {
-   username, password, spentTime, gitCommitElement,
+   username,
+   password,
+   spentTime,
+   gitCommitElement,
+   excludedIssues,
 } = require('./config');
 
 async function login(driver) {
@@ -70,6 +75,10 @@ async function resolveIssues(driver, unconfirmedIssues) {
       const issueName = await subject.getText();
       const estimatedTime = await issue.findElement(By.className('estimated_hours')).getText();
       const issueUrl = await subject.findElement(By.tagName('a')).getAttribute('href');
+      const issueId = issueUrl.split('/').slice(-1)[0];
+
+      // eslint-disable-next-line no-continue
+      if (excludedIssues.includes(issueId)) continue;
       console.log(`${i + 1}. unconfirmed issue: ${issueName} - ${issueUrl}`);
       issuesObj.push({ estimatedTime, issueUrl, issueName });
    }
