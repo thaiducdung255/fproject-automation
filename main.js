@@ -5,6 +5,7 @@ const chromedriver = require('chromedriver');
 const chrome = require('selenium-webdriver/chrome');
 
 const { login, getUnconfirmedIssues, resolveIssues } = require('./helper');
+const { isFproject } = require('./config');
 
 if (process.platform.slice(0, 3) === 'win') {
    chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build());
@@ -33,7 +34,7 @@ driver = new Builder()
    .build();
 
 async function init() {
-   const page = 'https://fproject.fpt.vn';
+   const page = isFproject ? 'https://fproject.fpt.vn' : 'https://redmine.org/login';
    console.log(`loading page: ${page}`);
    await driver.get(page);
 

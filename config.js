@@ -1,4 +1,5 @@
 module.exports = {
+   isFproject: true,
    username: 'DungTD10',
    password: 'Mklagi833.',
    spentTime: {
