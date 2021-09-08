@@ -27,6 +27,7 @@ process.on('SIGINT', async () => {
 const caps = Capabilities.chrome();
 const options = new chrome.Options(caps);
 options.addArguments('force-device-scale-factor=0.85');
+options.addArguments('headless');
 
 driver = new Builder()
    .forBrowser('chrome')

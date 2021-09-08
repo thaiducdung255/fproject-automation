@@ -98,7 +98,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
       // update status, percent, git url
       await driver.get(`${issueUrl}/edit`);
       await driver.wait(until.elementLocated(By.id('issue_notes')), 10000);
-      const commitUrl = gitCommitElement.replace('<USER>', username.toLocaleLowerCase()).replace('<ISSUE>', issueName).replace('<ID>', randomCommitID());
+      const commitUrl = gitCommitElement.replace('<USER>', username.toLocaleLowerCase()).replace('<ISSUE>', issueName.replace(/\s/g, '%20')).replace('<ID>', randomCommitID());
       await driver.findElement(By.id('issue_notes')).sendKeys(commitUrl);
       await driver.findElement(By.id('issue_done_ratio')).sendKeys('100%');
       await driver.findElement(By.id('issue_status_id')).sendKeys('RESOLVED');
