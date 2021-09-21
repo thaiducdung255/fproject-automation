@@ -1,4 +1,5 @@
 const { By, until, Key } = require('selenium-webdriver');
+const { writeFileSync, readFileSync } = require('fs');
 
 const {
    username,
@@ -66,6 +67,18 @@ function randomCommitID() {
 
 async function resolveIssues(driver, unconfirmedIssues) {
    let currentDate = 1;
+
+   try {
+      const lastLogTime = readFileSync('./last-log-time').toString();
+      const [dd, mm] = lastLogTime.split('/');
+
+      if (Number(mm) === new Date().getMonth()) {
+         currentDate = Number(dd);
+      }
+   } catch (err) {
+      console.log(err);
+   }
+
    const issuesObj = [];
 
    for (let i = 0; i < unconfirmedIssues.length; i += 1) {
@@ -105,6 +118,8 @@ async function resolveIssues(driver, unconfirmedIssues) {
       await driver.findElement(By.xpath('//*[@id="issue-form"]/input[6]')).click();
       console.log(`Resolved issue ${issueName} - ${issueUrl}`);
    }
+
+   writeFileSync('./last-log-time', String(currentDate).concat('/', new Date().getMonth()));
 }
 
 module.exports = {
