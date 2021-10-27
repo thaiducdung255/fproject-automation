@@ -28,12 +28,12 @@ async function getUnconfirmedIssues(driver, page) {
    return driver.findElements(By.className('hascontextmenu status-2'));
 }
 
-async function logTime(driver, estimatedTime, issueUrl, currentDate = 1) {
+async function logTime(driver, estimatedTime, issueUrl, currentDate = 1, currentMonth) {
+   const lCurrentMonth = currentMonth || new Date().getMonth() + 1;
    await driver.get(`${issueUrl}/time_entries/new`);
    await driver.wait(until.elementLocated(By.id('content')), 10000);
 
-   const currentMonth = new Date().getMonth() + 1;
-   const currentMonthStr = String(currentMonth).length === 1 ? '0'.concat(currentMonth) : String(currentMonth);
+   const currentMonthStr = String(lCurrentMonth).length === 1 ? '0'.concat(lCurrentMonth) : String(lCurrentMonth);
    const currentYear = new Date().getFullYear();
    const currentDateStr = String(currentDate).length === 1 ? '0'.concat(currentDate) : String(currentDate);
    const date = currentMonthStr.concat(currentDateStr, currentYear);
@@ -67,6 +67,7 @@ function randomCommitID() {
 
 async function resolveIssues(driver, unconfirmedIssues) {
    let currentDate = 1;
+   let currentMonth = 0;
 
    try {
       const lastLogTime = readFileSync('./last-log-time').toString();
@@ -74,6 +75,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
 
       if (Number(mm) === new Date().getMonth()) {
          currentDate = Number(dd);
+         currentMonth = ~~mm;
       }
    } catch (err) {
       console.log(err);
@@ -92,7 +94,6 @@ async function resolveIssues(driver, unconfirmedIssues) {
 
       // eslint-disable-next-line no-continue
       if (excludedIssues.includes(issueId)) continue;
-      console.log(`${i + 1}. unconfirmed issue: ${issueName} - ${issueUrl}`);
       issuesObj.push({ estimatedTime, issueUrl, issueName });
    }
 
@@ -100,12 +101,16 @@ async function resolveIssues(driver, unconfirmedIssues) {
       const { issueUrl, estimatedTime, issueName } = issuesObj.pop();
       // log time for issue
       while (true) {
-         const isSuccess = await logTime(driver, estimatedTime, issueUrl, currentDate);
+         const isSuccess = await logTime(driver, estimatedTime, issueUrl, currentDate, currentMonth);
          if (isSuccess) {
             break;
          }
 
          currentDate += 1;
+         if (currentDate >= 28) {
+            currentDate = 1;
+            currentMonth += 1;
+         }
       }
 
       // update status, percent, git url
@@ -119,7 +124,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
       console.log(`Resolved issue ${issueName} - ${issueUrl}`);
    }
 
-   writeFileSync('./last-log-time', String(currentDate).concat('/', new Date().getMonth()));
+   writeFileSync('./last-log-time', String(currentDate).concat('/', currentMonth));
 }
 
 module.exports = {
