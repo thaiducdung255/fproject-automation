@@ -7,5 +7,4 @@ module.exports = {
       '8.00': '6',
    },
    gitCommitElement: 'http://172.27.228.161/<USER>/<ISSUE>/-/commit/<ID>',
-   excludedIssues: ['580771', '580773'],
 };
