@@ -28,12 +28,13 @@ async function getUnconfirmedIssues(driver, page) {
    return driver.findElements(By.className('hascontextmenu status-2'));
 }
 
-async function logTime(driver, estimatedTime, issueUrl, currentDate = 1, currentMonth) {
-   const lCurrentMonth = currentMonth || new Date().getMonth() + 1;
+async function logTime(
+   driver, estimatedTime, issueUrl, currentDate = 1, currentMonth = new Date().getMonth() + 1,
+) {
    await driver.get(`${issueUrl}/time_entries/new`);
    await driver.wait(until.elementLocated(By.id('content')), 10000);
 
-   const currentMonthStr = String(lCurrentMonth).length === 1 ? '0'.concat(lCurrentMonth) : String(lCurrentMonth);
+   const currentMonthStr = String(currentMonth).length === 1 ? '0'.concat(currentMonth) : String(currentMonth);
    const currentYear = new Date().getFullYear();
    const currentDateStr = String(currentDate).length === 1 ? '0'.concat(currentDate) : String(currentDate);
    const date = currentMonthStr.concat(currentDateStr, currentYear);
@@ -67,18 +68,26 @@ function randomCommitID() {
 
 async function resolveIssues(driver, unconfirmedIssues) {
    let currentDate = 1;
-   let currentMonth = 0;
+   let currentMonth = new Date().getMonth() + 1;
 
    try {
-      const lastLogTime = readFileSync('./last-log-time').toString();
-      const [dd, mm] = lastLogTime.split('/');
+      const ddMM = readFileSync('./last-log-time').toString();
 
-      if (Number(mm) === new Date().getMonth()) {
+      if (ddMM) {
+         const [dd, mm] = ddMM.split('/');
          currentDate = Number(dd);
-         currentMonth = ~~mm;
+         currentMonth = Number(mm);
+
+         if (Number.isNaN(currentDate)) {
+            currentDate = 1;
+         }
+
+         if (Number.isNaN(currentMonth)) {
+            currentMonth = new Date().getMonth() + 1;
+         }
       }
    } catch (err) {
-      console.log(err);
+      console.log({ err });
    }
 
    const issuesObj = [];
@@ -97,16 +106,28 @@ async function resolveIssues(driver, unconfirmedIssues) {
       issuesObj.push({ estimatedTime, issueUrl, issueName });
    }
 
+   const totalIssues = issuesObj.length;
+   let index = 1;
+
    while (issuesObj.length > 0) {
       const { issueUrl, estimatedTime, issueName } = issuesObj.pop();
       // log time for issue
       while (true) {
-         const isSuccess = await logTime(driver, estimatedTime, issueUrl, currentDate, currentMonth);
+         const isSuccess = await logTime(
+            driver,
+            estimatedTime,
+            issueUrl,
+            currentDate,
+            currentMonth,
+         );
+
          if (isSuccess) {
+            index += 1;
             break;
          }
 
          currentDate += 1;
+
          if (currentDate >= 28) {
             currentDate = 1;
             currentMonth += 1;
@@ -121,7 +142,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
       await driver.findElement(By.id('issue_done_ratio')).sendKeys('100%');
       await driver.findElement(By.id('issue_status_id')).sendKeys('RESOLVED');
       await driver.findElement(By.xpath('//*[@id="issue-form"]/input[6]')).click();
-      console.log(`Resolved issue ${issueName} - ${issueUrl}`);
+      console.log(`[${index}/${totalIssues}] Resolved issue ${issueName} - ${issueUrl}`);
    }
 
    writeFileSync('./last-log-time', String(currentDate).concat('/', currentMonth));
