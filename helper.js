@@ -5,7 +5,8 @@ const {
    username,
    password,
    spentTime,
-   gitCommitElement,
+   gitCommitUrl,
+   gitCommitProjects,
    excludedIssues,
 } = require('./config');
 
@@ -29,13 +30,17 @@ async function getUnconfirmedIssues(driver, page) {
 }
 
 async function logTime(
-   driver, estimatedTime, issueUrl, currentDate = 1, currentMonth = new Date().getMonth() + 1,
+   driver,
+   estimatedTime,
+   issueUrl,
+   currentDate = 1,
+   currentMonth = new Date().getMonth() + 1,
+   currentYear = new Date().getFullYear(),
 ) {
    await driver.get(`${issueUrl}/time_entries/new`);
    await driver.wait(until.elementLocated(By.id('content')), 10000);
 
    const currentMonthStr = String(currentMonth).length === 1 ? '0'.concat(currentMonth) : String(currentMonth);
-   const currentYear = new Date().getFullYear();
    const currentDateStr = String(currentDate).length === 1 ? '0'.concat(currentDate) : String(currentDate);
    const date = currentMonthStr.concat(currentDateStr, currentYear);
 
@@ -69,14 +74,16 @@ function randomCommitID() {
 async function resolveIssues(driver, unconfirmedIssues) {
    let currentDate = 1;
    let currentMonth = new Date().getMonth() + 1;
+   let currentYear = new Date().getFullYear();
 
    try {
       const ddMM = readFileSync('./last-log-time').toString();
 
       if (ddMM) {
-         const [dd, mm] = ddMM.split('/');
+         const [dd, mm, yyyy] = ddMM.split('/');
          currentDate = Number(dd);
          currentMonth = Number(mm);
+         currentYear = Number(yyyy);
 
          if (Number.isNaN(currentDate)) {
             currentDate = 1;
@@ -84,6 +91,10 @@ async function resolveIssues(driver, unconfirmedIssues) {
 
          if (Number.isNaN(currentMonth)) {
             currentMonth = new Date().getMonth() + 1;
+         }
+
+         if (Number.isNaN(currentYear)) {
+            currentYear = new Date().getFullYear();
          }
       }
    } catch (err) {
@@ -119,6 +130,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
             issueUrl,
             currentDate,
             currentMonth,
+            currentYear,
          );
 
          if (isSuccess) {
@@ -130,14 +142,22 @@ async function resolveIssues(driver, unconfirmedIssues) {
 
          if (currentDate >= 28) {
             currentDate = 1;
-            currentMonth += 1;
+
+            if (currentMonth) {
+               currentMonth = 1;
+               currentYear += 1;
+            } else {
+               currentMonth += 1;
+            }
          }
       }
 
       // update status, percent, git url
       await driver.get(`${issueUrl}/edit`);
       await driver.wait(until.elementLocated(By.id('issue_notes')), 10000);
-      const commitUrl = gitCommitElement.replace('<USER>', username.toLocaleLowerCase()).replace('<ISSUE>', issueName.replace(/\s/g, '%20')).replace('<ID>', randomCommitID());
+      const randomProjectId = ~~(Math.random() * (gitCommitProjects.length - 1));
+      const randomProject = gitCommitProjects[randomProjectId];
+      const commitUrl = gitCommitUrl.replace('<USER>', username.toLocaleLowerCase()).replace('<PROJECT>', randomProject).replace('<ID>', randomCommitID());
       await driver.findElement(By.id('issue_notes')).sendKeys(commitUrl);
       await driver.findElement(By.id('issue_done_ratio')).sendKeys('100%');
       await driver.findElement(By.id('issue_status_id')).sendKeys('RESOLVED');
@@ -145,7 +165,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
       console.log(`[${index}/${totalIssues}] Resolved issue ${issueName} - ${issueUrl}`);
    }
 
-   writeFileSync('./last-log-time', String(currentDate).concat('/', currentMonth));
+   writeFileSync('./last-log-time', String(currentDate).concat('/', currentMonth, '/', currentYear));
 }
 
 module.exports = {

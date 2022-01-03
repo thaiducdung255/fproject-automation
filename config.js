@@ -8,6 +8,7 @@ module.exports = {
       '4.00': '3',
       '8.00': '6',
    },
-   gitCommitElement: 'http://172.27.228.161/<USER>/<ISSUE>/-/commit/<ID>',
+   gitCommitUrl: 'http://172.27.228.161/<USER>/<PROJECT>/-/commit/<ID>',
+   gitCommitProjects: ['sccd-api', 'camunda-service-tasks', 'camunda'],
    excludedIssues: ['605005', '580773', '580771'],
 };
