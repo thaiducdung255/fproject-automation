@@ -1,5 +1,6 @@
 const { By, until, Key } = require('selenium-webdriver');
 const { writeFileSync, readFileSync } = require('fs');
+const axios = require('axios');
 
 const {
    username,
@@ -8,7 +9,11 @@ const {
    gitCommitUrl,
    gitCommitProjects,
    excludedIssues,
+   verifyTask,
+   apiKey,
 } = require('./config');
+
+const { usernames } = verifyTask;
 
 async function login(driver) {
    await driver.wait(until.elementLocated(By.id('username')), 10000);
@@ -24,9 +29,24 @@ async function getUnconfirmedIssues(driver, page) {
 
    // finding unconfirmed issues
    console.log('finding unconfirmed issues');
-   await driver.get(`${page}/issues?assigned_to_id=${userId}&set_filter=1&sort=priority%3Adesc%2Cupdated_on%3Adesc`);
+   await driver.get(`${page}/issues?assigned_to_id=${userId}`);
    await driver.wait(until.elementLocated(By.id('content')), 10000);
    return driver.findElements(By.className('hascontextmenu status-2'));
+}
+
+async function getAndVerifyResolvedIssues(page) {
+   const getIssuesUrl = `${page}/issues.json?key=${apiKey}&limit=200&status_id=5&author_id=me`;
+   const getIssuesResp = await axios.get(getIssuesUrl);
+
+   const issues = getIssuesResp?.data?.issues.filter(
+      (issue) => !excludedIssues.includes(issue.id) && usernames.includes(issue.assigned_to.name),
+   );
+
+   issues.forEach(async (issue, index) => {
+      const updateIssueUrl = `${page}/issues/${issue.id}.json?key=${apiKey}`;
+      await axios.put(updateIssueUrl, { issue: { status_id: 6 } });
+      console.log(`Verified issue ${index + 1}/${issues.length}`);
+   });
 }
 
 async function logTime(
@@ -173,4 +193,5 @@ module.exports = {
    getUnconfirmedIssues,
    resolveIssues,
    randomCommitID,
+   getAndVerifyResolvedIssues,
 };

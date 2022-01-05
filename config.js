@@ -1,14 +1,19 @@
+require('dotenv/config');
+
 module.exports = {
-   isFproject: true,
-   username: 'DungTD10',
-   password: 'Mklagi818174833.',
-   // username: 'ThanhNV97',
-   // password: 'Tnvftel9796',
+   isResoveMode: process.env.IS_RESOLVE_MODE === 'true',
+   isFproject: process.env.IS_FPROJECT === 'true',
+   username: process.env.USERNAME || 'username',
+   password: process.env.PASSWORD || 'password',
+   gitCommitUrl: process.env.GIT_COMMIT_URL || 'git commit url',
+   gitCommitProjects: (process.env.GIT_COMMIT_PROJECTS || '').split(','),
+   excludedIssues: (process.env.EXCLUDED_ISSUES || '').split(','),
+   apiKey: process.env.API_KEY || 'no api key',
    spentTime: {
       '4.00': '3',
       '8.00': '6',
    },
-   gitCommitUrl: 'http://172.27.228.161/<USER>/<PROJECT>/-/commit/<ID>',
-   gitCommitProjects: ['sccd-api', 'camunda-service-tasks', 'camunda'],
-   excludedIssues: ['605005', '580773', '580771'],
+   verifyTask: {
+      usernames: (process.env.VERIFY_TASK_USERNAMES || '').split(','),
+   },
 };
