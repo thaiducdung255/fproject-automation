@@ -35,7 +35,7 @@ async function getUnconfirmedIssues(driver, page) {
 }
 
 async function getAndVerifyResolvedIssues(page) {
-   const getIssuesUrl = `${page}/issues.json?key=${apiKey}&limit=200&status_id=5&author_id=me`;
+   const getIssuesUrl = `${page}/issues.json?key=${apiKey}&limit=500&status_id=5&author_id=me`;
    const getIssuesResp = await axios.get(getIssuesUrl);
 
    const issues = getIssuesResp?.data?.issues.filter(
@@ -45,7 +45,7 @@ async function getAndVerifyResolvedIssues(page) {
    issues.forEach(async (issue, index) => {
       const updateIssueUrl = `${page}/issues/${issue.id}.json?key=${apiKey}`;
       await axios.put(updateIssueUrl, { issue: { status_id: 6 } });
-      console.log(`Verified issue ${index + 1}/${issues.length}`);
+      console.log(`Verified issue ${index + 1}/${issues.length}: ${issue.id}`);
    });
 }
 
