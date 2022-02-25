@@ -1,7 +1,7 @@
 require('dotenv/config');
 
 module.exports = {
-   isResoveMode: process.env.IS_RESOLVE_MODE === 'true',
+   isResolveMode: process.env.IS_RESOLVE_MODE === 'true',
    isFproject: process.env.IS_FPROJECT === 'true',
    username: process.env.USERNAME || 'username',
    password: process.env.PASSWORD || 'password',

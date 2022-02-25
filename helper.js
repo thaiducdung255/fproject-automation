@@ -97,10 +97,10 @@ async function resolveIssues(driver, unconfirmedIssues) {
    let currentYear = new Date().getFullYear();
 
    try {
-      const ddMM = readFileSync('./last-log-time').toString();
+      const ddMMyyyy = readFileSync('./last-log-time').toString();
 
-      if (ddMM) {
-         const [dd, mm, yyyy] = ddMM.split('/');
+      if (ddMMyyyy) {
+         const [dd, mm, yyyy] = ddMMyyyy.split('/');
          currentDate = Number(dd);
          currentMonth = Number(mm);
          currentYear = Number(yyyy);
@@ -138,9 +138,9 @@ async function resolveIssues(driver, unconfirmedIssues) {
    }
 
    const totalIssues = issuesObj.length;
-   let index = 1;
+   let index = 0;
 
-   while (issuesObj.length > 0) {
+   while (totalIssues > 0) {
       const { issueUrl, estimatedTime, issueName } = issuesObj.pop();
       // log time for issue
       while (true) {

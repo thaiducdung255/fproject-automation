@@ -9,7 +9,7 @@ const {
    login, getUnconfirmedIssues, resolveIssues, getAndVerifyResolvedIssues,
 } = require('./helper');
 
-const { isFproject, isResoveMode } = require('./config');
+const { isFproject, isResolveMode } = require('./config');
 
 let driver;
 
@@ -27,7 +27,7 @@ process.on('SIGINT', async () => {
 async function init() {
    const page = isFproject ? 'https://fproject.fpt.vn' : 'https://redmine.org/login';
 
-   if (isResoveMode) {
+   if (isResolveMode) {
       if (process.platform.slice(0, 3) === 'win') {
          chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build());
       }
