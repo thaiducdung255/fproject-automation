@@ -140,7 +140,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
    const totalIssues = issuesObj.length;
    let index = 0;
 
-   while (totalIssues > 0) {
+   while (issuesObj.length) {
       const { issueUrl, estimatedTime, issueName } = issuesObj.pop();
       // log time for issue
       while (true) {
@@ -163,7 +163,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
          if (currentDate >= 28) {
             currentDate = 1;
 
-            if (currentMonth) {
+            if (currentMonth === 12) {
                currentMonth = 1;
                currentYear += 1;
             } else {
