@@ -133,7 +133,7 @@ async function resolveIssues(driver, unconfirmedIssues) {
       const issueId = issueUrl.split('/').slice(-1)[0];
 
       // eslint-disable-next-line no-continue
-      if (excludedIssues.includes(issueId)) continue;
+      if (excludedIssues.includes(issueId) || !estimatedTime.length) continue;
       issuesObj.push({ estimatedTime, issueUrl, issueName });
    }
 
