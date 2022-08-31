@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.24.0",
-    "chromedriver": "^103.0.0",
+    "chromedriver": "^104.0.0",
     "dotenv": "^10.0.0",
     "once": "^1.4.0",
     "selenium-webdriver": "^4.0.0-beta.4"
